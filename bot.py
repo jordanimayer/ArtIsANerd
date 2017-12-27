@@ -13,25 +13,6 @@ Mostly intended as a learning experience for the developer.
 Utilizes tweepy and Molly White's twitter bot framework.
 """
 
-# Copyright (c) 2015–2016 Molly White
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
 import os
 import tweepy
@@ -46,64 +27,35 @@ logfile_name = bot_username + ".log"
 # ==============================================================
 
 ArtID = "2957673249"  # Art's twitter ID
-nerd = "@Queen__Arthur nerd"  # the text to tweet
 
 
-# SteamListener to listen to Art's tweets
 class ArtStreamListener(tweepy.StreamListener):
+    """
+    SteamListener to listen to Art's tweets
 
+    Currently not in use; may utilize in the future if using Raspberry Pi
+    or VPS to run 24/7
+    """
     def on_status(self, status):
-        if not status.retweeted and ('RT @' not in status.text):
-            print(status.text)
-
-        # decode JSON data
-        # tweetID = data.id
-        # tweet = json.loads(data)
-        # if not tweet['retweeted']:
-        # reply(nerd, tweetID)
+        # Filter out retweets and replies
+        if not tweet.retweeted and ('RT @' not in tweet.text) \
+                and (tweet.in_reply_to_status_id is None):
+            print(tweet.text)   # for testing
+            # reply("@Queen__Arthur nerd", tweet.id)
 
     def on_error(self, status_code):
         if status_code == 420:
             return False
 
-def create_tweet():
-    """Create the text of the tweet you want to send."""
-
-    test = "Hello world!"
-    return test
-
-    # Replace this with your code!
-    # text = "@Queen__Arthur nerd"
-    # return text
-
-
-def tweet(text):
-    """Send out the text as a tweet"""
-    auth = tweepy.OAuthHandler(C_KEY, C_SECRET)
-    auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
-    api = tweepy.API(auth)
-
-    # Send the tweet and log success or failure
-    try:
-        api.update_status(text)
-    except tweepy.error.TweepError as e:
-        log(e.message)
-    else:
-        log("Tweeted: " + text)
-
 
 def reply(text, reply_to):
     """Reply to Art's tweets"""
-    # Twitter authentication
-    auth = tweepy.OAuthHandler(C_KEY, C_SECRET)
-    auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
-    api = tweepy.API(auth)
 
     # Send the tweet and log success or failure
     try:
         api.update_status(text, reply_to)
     except tweepy.error.TweepError as e:
-        if (e.message == None):
+        if (e.message is None):
             log("Error with no message")
             print("Error with no message")
         else:
@@ -121,30 +73,29 @@ def log(message):
         t = strftime("%d %b %Y %H:%M:%S", gmtime())
         f.write("\n" + t + " " + message)
 
-def get_tweets():
-    for status in tweepy.Cursor(api.user_timeline, screen_name='@Queen__Arthur').items():
-        if not status.retweeted and ('RT @' not in status.text):
-            print(status.text)
-
 
 if __name__ == "__main__":
+    """Fetch all Amber's tweets since last run and reply"""
+    # Twitter authentication
     auth = tweepy.OAuthHandler(C_KEY, C_SECRET)
     auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
     api = tweepy.API(auth)
 
-    lastDate = datetime.datetime(2017, 12, 24, 0, 0, 0)
+    lastDate = datetime.datetime(2017, 12, 24, 0, 0, 0)     # Date of last run
 
-    allTweets = api.user_timeline(ArtID, count=100)
-    tweets = []
-    #print("Here")
-    for tweet in allTweets:
-        #print(tweet.text)
+    tweets = api.user_timeline(ArtID, count=100)     # Art's last 100 tweets
+    for tweet in tweets:
+        # Filter out retweets, replies, and old tweets
         if not tweet.retweeted and ('RT @' not in tweet.text) \
-                and (tweet.created_at > lastDate) and (tweet.in_reply_to_status_id == None):
-            print(tweet.text)
-            #tweets.append(tweet)
-            #reply("@Queen__Arthur nerd", tweet.id)
+                and (tweet.created_at > lastDate) and (tweet.in_reply_to_status_id is None):
+            print(tweet.text + "\n")    # Print tweet being replied to
+            reply("@Queen__Arthur nerd", tweet.id)  # Reply to tweet
 
+    """
+    Create and filter StreamListener
+    Currently not in use; may utilize in the future if using Raspberry Pi
+    or VPS to run 24/7
+    """
     #ArtSL = ArtStreamListener()
     #ArtStream = tweepy.Stream(auth=api.auth, listener=ArtStreamListener())
-    #ArtStream.filter(follow=[Queen__Amber])
+    #ArtStream.filter(follow=[ArtID])
