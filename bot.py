@@ -5,8 +5,7 @@ Created on Thu Dec 14 18:36:50 2017
 @author: Jordan Mayer, mayer15@purdue.edu
 
 A very simple Twitter bot that replies to @Queen__Arthur
-and calls her a nerd. Ignores retweets. Might ignore replies
-in the future.
+and calls her a nerd. Ignores retweets and replies.
 
 Mostly intended as a learning experience for the developer.
 
@@ -49,9 +48,14 @@ class ArtStreamListener(tweepy.StreamListener):
 
 
 def reply(text, reply_to):
-    """Reply to Art's tweets"""
+    """
+    Reply to a tweet
 
-    # Send the tweet and log success or failure
+    text = text of reply (must include @<user>)
+    reply_to = id of status (or user) to reply to
+    """
+
+    # Send reply and log success or failure
     try:
         api.update_status(text, reply_to)
     except tweepy.error.TweepError as e:
@@ -63,8 +67,6 @@ def reply(text, reply_to):
             print(e.message)
     else:
         log("Tweeted in reply to " + str(reply_to) + ": " + text)
-        print("Tweeted in reply to " + str(tweet.id) + ": " + "@Queen__Arthur nerd")
-
 
 def log(message):
     """Log message to logfile."""
