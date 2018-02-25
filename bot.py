@@ -25,7 +25,6 @@ logfile_name = bot_username + ".log"
 
 # ==============================================================
 
-ArtID = "2957673249"  # Art's twitter ID
 
 
 class ArtStreamListener(tweepy.StreamListener):
@@ -83,15 +82,20 @@ if __name__ == "__main__":
     auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
     api = tweepy.API(auth)
 
-    lastDate = datetime.datetime(2017, 12, 24, 0, 0, 0)     # Date of last run
+    AmberID = "2957673249"  # Amber's twitter ID
+    Amber = api.get_user(AmberID)
+    AmberHandle = Amber.screen_name
 
-    tweets = api.user_timeline(ArtID, count=100)     # Art's last 100 tweets
+    lastDate = datetime.datetime(2017, 1, 1, 0, 0, 0)     # Date of last run
+
+    tweets = AmberID.user_timeline(ArtID, count=100)     # Art's last 100 tweets
     for tweet in tweets:
         # Filter out retweets, replies, and old tweets
         if not tweet.retweeted and ('RT @' not in tweet.text) \
                 and (tweet.created_at > lastDate) and (tweet.in_reply_to_status_id is None):
             print(tweet.text + "\n")    # Print tweet being replied to
-            reply("@Queen__Arthur nerd", tweet.id)  # Reply to tweet
+            respond = "@" + AmberHandle + " nerd"
+            reply(respond, tweet.id)  # Reply to tweet
 
     """
     Create and filter StreamListener
